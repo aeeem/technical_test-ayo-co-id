@@ -1,9 +1,9 @@
 version: "3.3"
 services:
  
-  pos:
-    container_name: pos
-    image: pos:latest
+  tech:
+    container_name: tech
+    image: tech:latest
     ports:
       - "3434:3434"
     

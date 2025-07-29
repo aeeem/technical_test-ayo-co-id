@@ -1,0 +1,32 @@
+version: "3.3"
+services:
+ 
+  pos:
+    container_name: pos
+    image: pos:latest
+    ports:
+      - "3434:3434"
+    
+    restart: always
+    networks:
+      - traefik-network
+  dev_database:
+    container_name: dev_database
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: pos
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+# to keep volume for starvo-dashboard alive
+volumes:
+  mongo_vol:
+    external: true
+networks:
+  traefik-network:
+    external: true

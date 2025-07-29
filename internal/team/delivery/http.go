@@ -59,7 +59,7 @@ func (h *TeamHandler) Fetch(c *fiber.Ctx) (err error) {
 func (h *TeamHandler) GetById(c *fiber.Ctx) (err error) {
 	ID, err := c.ParamsInt("id")
 	if err != nil {
-		log.Info().Any("err", err).Msg("log from get by id")
+		err = helper.BadRequest
 		return helper.JsonErrorResponse(c, err)
 	}
 	res, err := h.TeamUsecase.GetById(ID)

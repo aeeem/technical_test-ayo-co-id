@@ -81,7 +81,6 @@ func (u *teamUsecase) Update(Team *team.Team) (err error) {
 
 func (u *teamUsecase) Delete(ID int) (err error) {
 	//check team
-
 	OldTeams, err := u.GetById(ID)
 	if err != nil {
 		return

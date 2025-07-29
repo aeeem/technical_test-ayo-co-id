@@ -17,9 +17,9 @@ func NewPlayerRepository(DB *gorm.DB) player.PlayerRepository {
 	}
 }
 
-func (r *playerRepository) Fetch(teamID *uint, lastDate string, lastID int, search string, limit int) (Player []player.Player, err error) {
+func (r *playerRepository) Fetch(teamID uint, lastDate string, lastID int, search string, limit int) (Player []player.Player, err error) {
 	q := r.DB
-	if teamID != nil {
+	if teamID != 0 {
 		q = q.Where("team_id = ?", teamID)
 	}
 

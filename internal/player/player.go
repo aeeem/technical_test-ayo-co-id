@@ -18,7 +18,7 @@ type Player struct {
 }
 
 type PlayerRepository interface {
-	Fetch(teamID *uint, lastDate string, lastId int, search string, limit int) (Player []Player, err error)
+	Fetch(teamID uint, lastDate string, lastId int, search string, limit int) (Player []Player, err error)
 	GetById(ID int) (Player Player, err error)
 	Save(Player *Player) (err error)
 	Update(Player *Player) (err error)
@@ -26,7 +26,7 @@ type PlayerRepository interface {
 }
 
 type PlayerUsecase interface {
-	Fetch(teamID *uint, lastDate string, lastId int, search string, limit int) (Player []Player, err error)
+	Fetch(teamID uint, cursor string, search string, limit int) (Player []Player, nextCursor string, err error)
 	GetById(ID int) (Player Player, err error)
 	Save(Player *Player) (err error)
 	Update(Player *Player) (err error)

@@ -24,7 +24,6 @@ func CheckIfErrFromDbToStatusCode(err error) (errs error) {
 }
 
 func JsonErrorResponse(c *fiber.Ctx, errs error) (err error) {
-	log.Debug().Err(err).Msg("err")
 	StatusCode, err := strconv.Atoi(errs.Error())
 	if err != nil {
 		log.Info().Err(err).Msg("Json error response error logs")

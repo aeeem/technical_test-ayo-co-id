@@ -1,0 +1,214 @@
+definitions:
+  helper.ListResponse:
+    properties:
+      data: {}
+      message:
+        example: success
+        type: string
+      next_cursor:
+        example: MTAxNTExOTQ1MjAwNzI5NDE=
+        type: string
+      timestamp:
+        example: success
+        type: string
+    type: object
+  helper.StdResponse:
+    properties:
+      data: {}
+      message:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  team.Team:
+    properties:
+      address:
+        example: address
+        type: string
+      city:
+        example: city
+        type: string
+      created_at:
+        example: 1994-12-15T13:47
+        type: string
+      founded:
+        example: founded
+        type: string
+      id:
+        example: 1
+        type: integer
+      logo:
+        example: logo
+        type: string
+      team_name:
+        example: team_name
+        type: string
+      updated_at:
+        example: 1994-12-15T13:47
+        type: string
+    type: object
+  team_http.TeamRequest:
+    properties:
+      address:
+        type: string
+      city:
+        type: string
+      founded:
+        type: string
+      logo:
+        type: string
+      team_name:
+        type: string
+    required:
+    - address
+    - city
+    - founded
+    - logo
+    - team_name
+    type: object
+  team_http.TeamRequestUpdate:
+    properties:
+      address:
+        type: string
+      city:
+        type: string
+      founded:
+        type: string
+      id:
+        type: integer
+      logo:
+        type: string
+      team_name:
+        type: string
+    required:
+    - address
+    - city
+    - founded
+    - id
+    - logo
+    - team_name
+    type: object
+info:
+  contact: {}
+paths:
+  /team:
+    get:
+      parameters:
+      - description: base64 encoded
+        in: query
+        name: cursor
+        type: string
+      - description: Team abcd
+        in: query
+        name: search
+        type: string
+      - description: "10"
+        in: query
+        name: limit
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.ListResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/team.Team'
+                  type: array
+              type: object
+      summary: fetch team data
+      tags:
+      - Team
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: team post request
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/team_http.TeamRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/team.Team'
+              type: object
+      summary: Insert data into databases
+      tags:
+      - Team
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: team put request
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/team_http.TeamRequestUpdate'
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/team.Team'
+              type: object
+      summary: Update data from databases
+      tags:
+      - Team
+  /team/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  type: object
+              type: object
+      summary: Delete data from databases
+      tags:
+      - Team
+    get:
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/team.Team'
+              type: object
+      summary: get detail team data
+      tags:
+      - Team
+swagger: "2.0"

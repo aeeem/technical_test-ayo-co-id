@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"errors"
 	"technical_test-ayo-co-id/internal/helper"
 	"technical_test-ayo-co-id/internal/team"
 )
@@ -16,7 +15,7 @@ func NewTeamUsecase(teamRepository team.TeamRepository) team.TeamUsecase {
 	}
 }
 
-func (u *teamUsecase) Fetch(cursor string, search string) (team []team.Team, nextCursor string, err error) {
+func (u *teamUsecase) Fetch(cursor string, search string, limit int) (team []team.Team, nextCursor string, err error) {
 	//get cursor and decode it
 	date, ID, err := helper.CursorToDateAndID(cursor)
 	if err != nil {
@@ -24,14 +23,13 @@ func (u *teamUsecase) Fetch(cursor string, search string) (team []team.Team, nex
 		return
 	}
 
-	team, err = u.teamRepository.Fetch(date, ID, search)
+	team, err = u.teamRepository.Fetch(date, ID, search, limit)
 	if err != nil {
 		//handling error
 		return
 	}
 
-	if len(team) > 0 {
-
+	if len(team) > 0 && len(team) == limit {
 		lastDataCreatedAt := team[len(team)-1].CreatedAt.String()
 		lastDataID := team[len(team)-1].ID
 		//encode last data of this response into last cursor data
@@ -56,7 +54,7 @@ func (u *teamUsecase) GetById(ID int) (team team.Team, err error) {
 }
 
 func (u *teamUsecase) Save(Team *team.Team) (err error) {
-	err = u.Save(Team)
+	err = u.teamRepository.Save(Team)
 	if err != nil {
 		return
 	}
@@ -71,7 +69,6 @@ func (u *teamUsecase) Update(Team *team.Team) (err error) {
 	}
 	//in case gorm doesnt return error not found
 	if (OldTeams == team.Team{}) {
-		err = errors.New("Data not found")
 		return
 	}
 	err = u.teamRepository.Update(Team)
@@ -91,7 +88,6 @@ func (u *teamUsecase) Delete(ID int) (err error) {
 	}
 	//in case gorm doesnt return error not found
 	if (OldTeams == team.Team{}) {
-		err = errors.New("Data not found")
 		return
 	}
 	err = u.teamRepository.Delete(ID)

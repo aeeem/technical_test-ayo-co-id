@@ -1,18 +1,20 @@
 package team
 
-import "gorm.io/gorm"
+import (
+	"technical_test-ayo-co-id/internal/helper"
+)
 
 type Team struct {
-	gorm.Model
-	TeamName string `json:"team_name" `
-	Logo     string `json:"logo" `
-	Founded  string `json:"founded" `
-	Address  string `json:"address" `
-	City     string `json:"city" `
+	helper.Model
+	TeamName string `json:"team_name" example:"team_name"`
+	Logo     string `json:"logo" example:"logo"`
+	Founded  string `json:"founded" example:"founded"`
+	Address  string `json:"address" example:"address"`
+	City     string `json:"city" example:"city"`
 }
 
 type TeamRepository interface {
-	Fetch(lastDate string, lastId int, search string) (team []Team, err error)
+	Fetch(lastDate string, lastId int, search string, limit int) (team []Team, err error)
 	GetById(ID int) (team Team, err error)
 	Save(Team *Team) (err error)
 	Update(Team *Team) (err error)
@@ -20,7 +22,7 @@ type TeamRepository interface {
 }
 
 type TeamUsecase interface {
-	Fetch(cursor string, search string) (team []Team, nextCursor string, err error)
+	Fetch(cursor string, search string, limit int) (team []Team, nextCursor string, err error)
 	GetById(ID int) (team Team, err error)
 	Save(Team *Team) (err error)
 	Update(Team *Team) (err error)

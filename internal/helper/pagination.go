@@ -10,6 +10,9 @@ import (
 
 func CursorToDateAndID(cursor string) (lastDate string, lastID int, err error) {
 	//take base64
+	if cursor == "" {
+		return
+	}
 	b, err := base64.StdEncoding.DecodeString(cursor)
 	if err != nil {
 		return

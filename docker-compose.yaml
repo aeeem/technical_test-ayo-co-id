@@ -1,0 +1,52 @@
+version: "3.3"
+services:
+  tech-test-db:
+    hostname: tech-test-db
+    container_name: tech-test-db
+    image: postgres
+    networks: 
+      - tech
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+    expose:
+      - "5433"
+    ports:
+      - "5433:5433"
+    environment:
+      POSTGRES_DB: tech-test
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
+    command: -p 5433
+     
+  tech-test:
+    networks: 
+      - tech
+    container_name: tech-test
+    image: tech-test:latest
+    ports:
+      - "9292:9292"    
+    restart: always
+    depends_on:
+      - tech-test-db
+    volumes:
+      - ./config.json:/config.json
+  
+  adminer:
+    networks: 
+      - tech
+    image: dockette/adminer
+    ports:
+      - 8686:80  
+    links:
+      - tech-test-db
+
+networks:
+  tech:
+    driver: bridge
+# to keep volume for starvo-dashboard alive
+volumes:
+  mongo_vol:
+    external: true
+  pgdata:
+    driver: local

@@ -1,4 +1,8 @@
-daemon-reload: 
-	systemctl daemon-reload
-	systemctl start pos.service
+all: build
 
+
+dockerbuild:
+	swag init
+	go build 
+	docker build --platform linux/amd64 -f DOCKERFILE . -t tech-test
+	docker compose -f docker-compose.yaml up --build -d

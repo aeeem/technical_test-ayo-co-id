@@ -26,7 +26,9 @@ func (r *playerRepository) Fetch(teamID uint, lastDate string, lastID int, searc
 	if lastDate != "" {
 		q = q.Where("created_at > ?", lastDate)
 	}
-
+	if search != "" {
+		q = q.Where("ILIKE %?%", search)
+	}
 	if lastID != 0 {
 		q = q.Where("id > ?", lastID)
 	}

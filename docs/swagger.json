@@ -4,6 +4,571 @@
         "contact": {}
     },
     "paths": {
+        "/match": {
+            "get": {
+                "tags": [
+                    "match"
+                ],
+                "summary": "fetch match data",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "not required but if filled it will filter match history between teams",
+                        "name": "home_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "not required but if filled it will filter match history between teams",
+                        "name": "away_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "not required but if filled it will return match history where player become MVP",
+                        "name": "player_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "base64 encoded",
+                        "name": "cursor",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Team abcd",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "10",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.ListResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/match.Match"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updating data after match finished",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Update data from databases",
+                "parameters": [
+                    {
+                        "description": "match put request",
+                        "name": "id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/match_http.MatchRequestUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.StdResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/match.Match"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Insert data into databases",
+                "parameters": [
+                    {
+                        "description": "team post request",
+                        "name": "id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/match_http.MatchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.StdResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/match.Match"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/match/{id}": {
+            "get": {
+                "tags": [
+                    "match"
+                ],
+                "summary": "get detail match data",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "user id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.StdResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/match.Match"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "match"
+                ],
+                "summary": "Delete data from databases",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "match id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.StdResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/player": {
+            "get": {
+                "tags": [
+                    "player"
+                ],
+                "summary": "fetch player data",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "not required but if filled will filter by team id",
+                        "name": "team_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "base64 encoded",
+                        "name": "cursor",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Team abcd",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "10",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.ListResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/player.Player"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "player"
+                ],
+                "summary": "Update data from databases",
+                "parameters": [
+                    {
+                        "description": "Player put request",
+                        "name": "id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/player_http.PlayerRequestUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.StdResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/player.Player"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "player"
+                ],
+                "summary": "Insert data into databases",
+                "parameters": [
+                    {
+                        "description": "team post request",
+                        "name": "id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/player_http.PlayerRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.StdResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/player.Player"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/player/{id}": {
+            "get": {
+                "tags": [
+                    "player"
+                ],
+                "summary": "get detail player data",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "user id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.StdResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/player.Player"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "player"
+                ],
+                "summary": "Delete data from databases",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Player id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.StdResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/score": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Score"
+                ],
+                "summary": "Insert data into databases",
+                "parameters": [
+                    {
+                        "description": "score post request",
+                        "name": "id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/score_http.ScoreRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.StdResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/score.Score"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/score/{match_id}": {
+            "get": {
+                "tags": [
+                    "Score"
+                ],
+                "summary": "fetch team data",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "match id",
+                        "name": "MatchID",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.ListResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/score.Score"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/score/{match_id}/{team_id}": {
+            "get": {
+                "tags": [
+                    "Score"
+                ],
+                "summary": "fetch team data",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "match id",
+                        "name": "match_id",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "team id",
+                        "name": "team_id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.ListResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/score.Score"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/team": {
             "get": {
                 "tags": [
@@ -243,6 +808,384 @@
                 }
             }
         },
+        "match.Match": {
+            "type": "object",
+            "properties": {
+                "away_team": {
+                    "type": "integer"
+                },
+                "away_team_details": {
+                    "$ref": "#/definitions/team.Team"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "1994-12-15T13:47"
+                },
+                "home_team": {
+                    "type": "integer"
+                },
+                "home_team_details": {
+                    "description": "this type of model should be handled differently only inside Match details usecase",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/team.Team"
+                        }
+                    ]
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "match_date": {
+                    "type": "string"
+                },
+                "match_description": {
+                    "type": "string"
+                },
+                "match_score": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/score.Score"
+                    }
+                },
+                "match_status": {
+                    "type": "string"
+                },
+                "match_time": {
+                    "type": "string"
+                },
+                "player_mvp": {
+                    "$ref": "#/definitions/player.Player"
+                },
+                "player_mvp_id": {
+                    "type": "integer"
+                },
+                "previous_match": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/match.Match"
+                    }
+                },
+                "score_away": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/score.Score"
+                    }
+                },
+                "score_home": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/score.Score"
+                    }
+                },
+                "team_winner_name": {
+                    "type": "string"
+                },
+                "total_score_away": {
+                    "type": "integer"
+                },
+                "total_score_home": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "1994-12-15T13:47"
+                },
+                "winner": {
+                    "type": "integer"
+                }
+            }
+        },
+        "match_http.MatchRequest": {
+            "type": "object",
+            "required": [
+                "away_team",
+                "home_team",
+                "match_date",
+                "match_status",
+                "match_time"
+            ],
+            "properties": {
+                "away_team": {
+                    "type": "integer"
+                },
+                "home_team": {
+                    "type": "integer"
+                },
+                "match_date": {
+                    "type": "string",
+                    "example": "1994-12-15"
+                },
+                "match_status": {
+                    "type": "string",
+                    "enum": [
+                        "ongoing",
+                        "finished",
+                        "upcoming"
+                    ],
+                    "example": "upcoming"
+                },
+                "match_time": {
+                    "type": "string",
+                    "example": "15:45:00"
+                }
+            }
+        },
+        "match_http.MatchRequestUpdate": {
+            "type": "object",
+            "required": [
+                "away_team",
+                "home_team",
+                "id",
+                "match_date",
+                "match_description",
+                "match_status",
+                "match_status",
+                "match_time",
+                "player_mvp_id",
+                "team_winner_name",
+                "winner"
+            ],
+            "properties": {
+                "away_team": {
+                    "type": "integer"
+                },
+                "home_team": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "match_date": {
+                    "type": "string",
+                    "example": "1994-12-15"
+                },
+                "match_description": {
+                    "type": "string"
+                },
+                "match_status": {
+                    "type": "string"
+                },
+                "match_time": {
+                    "type": "string",
+                    "example": "15:45:00"
+                },
+                "player_mvp_id": {
+                    "type": "integer"
+                },
+                "team_winner_name": {
+                    "type": "string"
+                },
+                "total_score_away": {
+                    "type": "integer"
+                },
+                "total_score_home": {
+                    "type": "integer"
+                },
+                "winner": {
+                    "type": "integer"
+                }
+            }
+        },
+        "player.Player": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "1994-12-15T13:47"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "height": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "jersey_number": {
+                    "type": "integer"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "string"
+                },
+                "team": {
+                    "$ref": "#/definitions/team.Team"
+                },
+                "team_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "1994-12-15T13:47"
+                },
+                "weight": {
+                    "type": "integer"
+                }
+            }
+        },
+        "player_http.PlayerRequest": {
+            "type": "object",
+            "required": [
+                "first_name",
+                "height",
+                "last_name",
+                "position",
+                "team_id",
+                "weight"
+            ],
+            "properties": {
+                "first_name": {
+                    "type": "string",
+                    "example": "Arif"
+                },
+                "height": {
+                    "type": "integer",
+                    "example": 173
+                },
+                "jersey_number": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "example": 11
+                },
+                "last_name": {
+                    "type": "string",
+                    "example": "Maulana"
+                },
+                "position": {
+                    "type": "string",
+                    "enum": [
+                        "attacker",
+                        "midfielder",
+                        "defender",
+                        "goalkeeper"
+                    ],
+                    "example": "midfielder"
+                },
+                "team_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "weight": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
+        "player_http.PlayerRequestUpdate": {
+            "type": "object",
+            "required": [
+                "first_name",
+                "height",
+                "id",
+                "last_name",
+                "position",
+                "team_id",
+                "weight"
+            ],
+            "properties": {
+                "first_name": {
+                    "type": "string",
+                    "example": "Arif"
+                },
+                "height": {
+                    "type": "integer",
+                    "example": 173
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "jersey_number": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "example": 11
+                },
+                "last_name": {
+                    "type": "string",
+                    "example": "Maulana"
+                },
+                "position": {
+                    "type": "string",
+                    "enum": [
+                        "attacker",
+                        "midfielder",
+                        "defender",
+                        "goalkeeper"
+                    ],
+                    "example": "midfielder"
+                },
+                "team_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "weight": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
+        "score.Score": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "1994-12-15T13:47"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "match_id": {
+                    "type": "integer"
+                },
+                "player_id": {
+                    "type": "integer"
+                },
+                "score_time": {
+                    "type": "string"
+                },
+                "team_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "1994-12-15T13:47"
+                }
+            }
+        },
+        "score_http.ScoreRequest": {
+            "type": "object",
+            "required": [
+                "match_id",
+                "player_id",
+                "score_time",
+                "team_id"
+            ],
+            "properties": {
+                "match_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "player_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "score_time": {
+                    "type": "string",
+                    "example": "12:30:00"
+                },
+                "team_id": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
         "team.Team": {
             "type": "object",
             "properties": {
@@ -257,10 +1200,6 @@
                 "created_at": {
                     "type": "string",
                     "example": "1994-12-15T13:47"
-                },
-                "founded": {
-                    "type": "string",
-                    "example": "founded"
                 },
                 "id": {
                     "type": "integer",
@@ -277,6 +1216,10 @@
                 "updated_at": {
                     "type": "string",
                     "example": "1994-12-15T13:47"
+                },
+                "year_founded": {
+                    "type": "string",
+                    "example": "1994"
                 }
             }
         },
@@ -285,9 +1228,9 @@
             "required": [
                 "address",
                 "city",
-                "founded",
                 "logo",
-                "team_name"
+                "team_name",
+                "year_founded"
             ],
             "properties": {
                 "address": {
@@ -296,13 +1239,13 @@
                 "city": {
                     "type": "string"
                 },
-                "founded": {
-                    "type": "string"
-                },
                 "logo": {
                     "type": "string"
                 },
                 "team_name": {
+                    "type": "string"
+                },
+                "year_founded": {
                     "type": "string"
                 }
             }
@@ -312,19 +1255,16 @@
             "required": [
                 "address",
                 "city",
-                "founded",
                 "id",
                 "logo",
-                "team_name"
+                "team_name",
+                "year_founded"
             ],
             "properties": {
                 "address": {
                     "type": "string"
                 },
                 "city": {
-                    "type": "string"
-                },
-                "founded": {
                     "type": "string"
                 },
                 "id": {
@@ -334,6 +1274,9 @@
                     "type": "string"
                 },
                 "team_name": {
+                    "type": "string"
+                },
+                "year_founded": {
                     "type": "string"
                 }
             }

@@ -20,6 +20,279 @@ definitions:
       timestamp:
         type: string
     type: object
+  match.Match:
+    properties:
+      away_team:
+        type: integer
+      away_team_details:
+        $ref: '#/definitions/team.Team'
+      created_at:
+        example: 1994-12-15T13:47
+        type: string
+      home_team:
+        type: integer
+      home_team_details:
+        allOf:
+        - $ref: '#/definitions/team.Team'
+        description: this type of model should be handled differently only inside
+          Match details usecase
+      id:
+        example: 1
+        type: integer
+      match_date:
+        type: string
+      match_description:
+        type: string
+      match_score:
+        items:
+          $ref: '#/definitions/score.Score'
+        type: array
+      match_status:
+        type: string
+      match_time:
+        type: string
+      player_mvp:
+        $ref: '#/definitions/player.Player'
+      player_mvp_id:
+        type: integer
+      previous_match:
+        items:
+          $ref: '#/definitions/match.Match'
+        type: array
+      score_away:
+        items:
+          $ref: '#/definitions/score.Score'
+        type: array
+      score_home:
+        items:
+          $ref: '#/definitions/score.Score'
+        type: array
+      team_winner_name:
+        type: string
+      total_score_away:
+        type: integer
+      total_score_home:
+        type: integer
+      updated_at:
+        example: 1994-12-15T13:47
+        type: string
+      winner:
+        type: integer
+    type: object
+  match_http.MatchRequest:
+    properties:
+      away_team:
+        type: integer
+      home_team:
+        type: integer
+      match_date:
+        example: "1994-12-15"
+        type: string
+      match_status:
+        enum:
+        - ongoing
+        - finished
+        - upcoming
+        example: upcoming
+        type: string
+      match_time:
+        example: "15:45:00"
+        type: string
+    required:
+    - away_team
+    - home_team
+    - match_date
+    - match_status
+    - match_time
+    type: object
+  match_http.MatchRequestUpdate:
+    properties:
+      away_team:
+        type: integer
+      home_team:
+        type: integer
+      id:
+        example: 1
+        type: integer
+      match_date:
+        example: "1994-12-15"
+        type: string
+      match_description:
+        type: string
+      match_status:
+        type: string
+      match_time:
+        example: "15:45:00"
+        type: string
+      player_mvp_id:
+        type: integer
+      team_winner_name:
+        type: string
+      total_score_away:
+        type: integer
+      total_score_home:
+        type: integer
+      winner:
+        type: integer
+    required:
+    - away_team
+    - home_team
+    - id
+    - match_date
+    - match_description
+    - match_status
+    - match_status
+    - match_time
+    - player_mvp_id
+    - team_winner_name
+    - winner
+    type: object
+  player.Player:
+    properties:
+      created_at:
+        example: 1994-12-15T13:47
+        type: string
+      first_name:
+        type: string
+      height:
+        type: integer
+      id:
+        example: 1
+        type: integer
+      jersey_number:
+        type: integer
+      last_name:
+        type: string
+      position:
+        type: string
+      team:
+        $ref: '#/definitions/team.Team'
+      team_id:
+        type: integer
+      updated_at:
+        example: 1994-12-15T13:47
+        type: string
+      weight:
+        type: integer
+    type: object
+  player_http.PlayerRequest:
+    properties:
+      first_name:
+        example: Arif
+        type: string
+      height:
+        example: 173
+        type: integer
+      jersey_number:
+        example: 11
+        minimum: 0
+        type: integer
+      last_name:
+        example: Maulana
+        type: string
+      position:
+        enum:
+        - attacker
+        - midfielder
+        - defender
+        - goalkeeper
+        example: midfielder
+        type: string
+      team_id:
+        example: 1
+        type: integer
+      weight:
+        example: 200
+        type: integer
+    required:
+    - first_name
+    - height
+    - last_name
+    - position
+    - team_id
+    - weight
+    type: object
+  player_http.PlayerRequestUpdate:
+    properties:
+      first_name:
+        example: Arif
+        type: string
+      height:
+        example: 173
+        type: integer
+      id:
+        example: 1
+        type: integer
+      jersey_number:
+        example: 11
+        minimum: 0
+        type: integer
+      last_name:
+        example: Maulana
+        type: string
+      position:
+        enum:
+        - attacker
+        - midfielder
+        - defender
+        - goalkeeper
+        example: midfielder
+        type: string
+      team_id:
+        example: 1
+        type: integer
+      weight:
+        example: 200
+        type: integer
+    required:
+    - first_name
+    - height
+    - id
+    - last_name
+    - position
+    - team_id
+    - weight
+    type: object
+  score.Score:
+    properties:
+      created_at:
+        example: 1994-12-15T13:47
+        type: string
+      id:
+        example: 1
+        type: integer
+      match_id:
+        type: integer
+      player_id:
+        type: integer
+      score_time:
+        type: string
+      team_id:
+        type: integer
+      updated_at:
+        example: 1994-12-15T13:47
+        type: string
+    type: object
+  score_http.ScoreRequest:
+    properties:
+      match_id:
+        example: 1
+        type: integer
+      player_id:
+        example: 1
+        type: integer
+      score_time:
+        example: "12:30:00"
+        type: string
+      team_id:
+        example: 1
+        type: integer
+    required:
+    - match_id
+    - player_id
+    - score_time
+    - team_id
+    type: object
   team.Team:
     properties:
       address:
@@ -30,9 +303,6 @@ definitions:
         type: string
       created_at:
         example: 1994-12-15T13:47
-        type: string
-      founded:
-        example: founded
         type: string
       id:
         example: 1
@@ -46,6 +316,9 @@ definitions:
       updated_at:
         example: 1994-12-15T13:47
         type: string
+      year_founded:
+        example: "1994"
+        type: string
     type: object
   team_http.TeamRequest:
     properties:
@@ -53,18 +326,18 @@ definitions:
         type: string
       city:
         type: string
-      founded:
-        type: string
       logo:
         type: string
       team_name:
         type: string
+      year_founded:
+        type: string
     required:
     - address
     - city
-    - founded
     - logo
     - team_name
+    - year_founded
     type: object
   team_http.TeamRequestUpdate:
     properties:
@@ -72,25 +345,357 @@ definitions:
         type: string
       city:
         type: string
-      founded:
-        type: string
       id:
         type: integer
       logo:
         type: string
       team_name:
         type: string
+      year_founded:
+        type: string
     required:
     - address
     - city
-    - founded
     - id
     - logo
     - team_name
+    - year_founded
     type: object
 info:
   contact: {}
 paths:
+  /match:
+    get:
+      parameters:
+      - description: not required but if filled it will filter match history between
+          teams
+        in: query
+        name: home_id
+        type: integer
+      - description: not required but if filled it will filter match history between
+          teams
+        in: query
+        name: away_id
+        type: integer
+      - description: not required but if filled it will return match history where
+          player become MVP
+        in: query
+        name: player_id
+        type: integer
+      - description: base64 encoded
+        in: query
+        name: cursor
+        type: string
+      - description: Team abcd
+        in: query
+        name: search
+        type: string
+      - description: "10"
+        in: query
+        name: limit
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.ListResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/match.Match'
+                  type: array
+              type: object
+      summary: fetch match data
+      tags:
+      - match
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: team post request
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/match_http.MatchRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/match.Match'
+              type: object
+      summary: Insert data into databases
+      tags:
+      - match
+    put:
+      consumes:
+      - application/json
+      description: Updating data after match finished
+      parameters:
+      - description: match put request
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/match_http.MatchRequestUpdate'
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/match.Match'
+              type: object
+      summary: Update data from databases
+      tags:
+      - match
+  /match/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: match id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  type: object
+              type: object
+      summary: Delete data from databases
+      tags:
+      - match
+    get:
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/match.Match'
+              type: object
+      summary: get detail match data
+      tags:
+      - match
+  /player:
+    get:
+      parameters:
+      - description: not required but if filled will filter by team id
+        in: query
+        name: team_id
+        type: integer
+      - description: base64 encoded
+        in: query
+        name: cursor
+        type: string
+      - description: Team abcd
+        in: query
+        name: search
+        type: string
+      - description: "10"
+        in: query
+        name: limit
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.ListResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/player.Player'
+                  type: array
+              type: object
+      summary: fetch player data
+      tags:
+      - player
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: team post request
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/player_http.PlayerRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/player.Player'
+              type: object
+      summary: Insert data into databases
+      tags:
+      - player
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Player put request
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/player_http.PlayerRequestUpdate'
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/player.Player'
+              type: object
+      summary: Update data from databases
+      tags:
+      - player
+  /player/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Player id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  type: object
+              type: object
+      summary: Delete data from databases
+      tags:
+      - player
+    get:
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/player.Player'
+              type: object
+      summary: get detail player data
+      tags:
+      - player
+  /score:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: score post request
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/score_http.ScoreRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/score.Score'
+              type: object
+      summary: Insert data into databases
+      tags:
+      - Score
+  /score/{match_id}:
+    get:
+      parameters:
+      - description: match id
+        in: query
+        name: MatchID
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.ListResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/score.Score'
+                  type: array
+              type: object
+      summary: fetch team data
+      tags:
+      - Score
+  /score/{match_id}/{team_id}:
+    get:
+      parameters:
+      - description: match id
+        in: path
+        name: match_id
+        type: integer
+      - description: team id
+        in: path
+        name: team_id
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.ListResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/score.Score'
+                  type: array
+              type: object
+      summary: fetch team data
+      tags:
+      - Score
   /team:
     get:
       parameters:

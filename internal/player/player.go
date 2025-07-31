@@ -7,14 +7,14 @@ import (
 
 type Player struct {
 	helper.Model
-	FirstName    string    `json:"first_name" gorm:"index"`
-	LastName     string    `json:"last_name" gorm:"index"`
-	Height       uint      `json:"height"`
-	Weight       uint      `json:"weight"`
-	Position     string    `json:"position"`
-	JerseyNumber int       `json:"jersey_number" gorm:"unique:idx_player_team"`
-	TeamID       uint      `json:"team_id" gorm:"unique:idx_player_team"`
-	Team         team.Team `json:"team"`
+	FirstName    string     `json:"first_name" gorm:"index"`
+	LastName     string     `json:"last_name" gorm:"index"`
+	Height       uint       `json:"height"`
+	Weight       uint       `json:"weight"`
+	Position     string     `json:"position"`
+	JerseyNumber int        `json:"jersey_number" gorm:"uniqueIndex:idx_player_team"`
+	TeamID       uint       `json:"team_id" gorm:"uniqueIndex:idx_player_team"`
+	Team         *team.Team `json:"team"`
 }
 
 type PlayerRepository interface {

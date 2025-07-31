@@ -6,21 +6,47 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/lib/pq"
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 )
 
+const (
+	UniqueViolationCode = pq.ErrorCode("23505")
+)
+
+func IsErrorCode(err error, errcode pq.ErrorCode) bool {
+	if pgerr, ok := err.(*pq.Error); ok {
+		return pgerr.Code == errcode
+	}
+	return false
+}
+
 func CheckIfErrFromDbToStatusCode(err error) (errs error) {
+	var pqErr *pgconn.PgError
+	errors.As(err, &pqErr)
+	log.Print(pqErr)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return ErrNotFound
 	}
-	if errors.Is(err, gorm.ErrDuplicatedKey) {
+	if pq.ErrorCode(pqErr.Code) == UniqueViolationCode {
 		return Duplicate
 	}
 	if errors.Is(err, gorm.ErrForeignKeyViolated) {
 		return BadRequest
 	}
-	return
+
+	return InternalServerErr
+}
+
+func JsonErrorResponseValidation(c *fiber.Ctx, errs error) (err error) {
+	return c.Status(400).JSON(
+		ErrorResponse{
+			Message:   errs.Error(),
+			Timestamp: time.Now().Format(time.RFC3339),
+		},
+	)
 }
 
 func JsonErrorResponse(c *fiber.Ctx, errs error) (err error) {
@@ -52,6 +78,11 @@ func JsonErrorResponse(c *fiber.Ctx, errs error) (err error) {
 	} else if errors.Is(errs, Forbidden) {
 		return c.Status(StatusCode).JSON(ErrorResponse{
 			Message:   "Forbidden",
+			Timestamp: time.Now().Format(time.RFC3339),
+		})
+	} else if errors.Is(errs, BadRequest) {
+		return c.Status(StatusCode).JSON(ErrorResponse{
+			Message:   "Bad Request",
 			Timestamp: time.Now().Format(time.RFC3339),
 		})
 	} else {

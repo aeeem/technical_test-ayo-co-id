@@ -4,13 +4,28 @@ import (
 	"fmt"
 	"log"
 	"os"
+	internalValidator "technical_test-ayo-co-id/internal/validator"
 	"time"
+
+	"technical_test-ayo-co-id/internal/player"
+	player_http "technical_test-ayo-co-id/internal/player/delivery"
+	playerRepository "technical_test-ayo-co-id/internal/player/repository"
+	playerUsecase "technical_test-ayo-co-id/internal/player/usecase"
+
+	"technical_test-ayo-co-id/internal/score"
+	score_http "technical_test-ayo-co-id/internal/score/delivery"
+	scoreRepository "technical_test-ayo-co-id/internal/score/repository"
+	scoreUsecase "technical_test-ayo-co-id/internal/score/usecase"
 
 	"technical_test-ayo-co-id/internal/team"
 	team_http "technical_test-ayo-co-id/internal/team/delivery"
 	teamRepository "technical_test-ayo-co-id/internal/team/repository"
 	teamUsecase "technical_test-ayo-co-id/internal/team/usecase"
-	internalValidator "technical_test-ayo-co-id/internal/validator"
+
+	"technical_test-ayo-co-id/internal/match"
+	match_http "technical_test-ayo-co-id/internal/match/delivery"
+	matchRepository "technical_test-ayo-co-id/internal/match/repository"
+	matchUsecase "technical_test-ayo-co-id/internal/match/usecase"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -61,6 +76,9 @@ func HttpRun(port string) {
 	//migration
 	db.AutoMigrate(
 		team.Team{},
+		player.Player{},
+		match.Match{},
+		score.Score{},
 	)
 
 	app := fiber.New()
@@ -72,10 +90,23 @@ func HttpRun(port string) {
 		return c.SendString("Hello, World!")
 	})
 
-	//Team domain
+	//repository
 	teamRepository := teamRepository.NewTeamPostgreRepository(db)
+	playerRepository := playerRepository.NewPlayerRepository(db)
+	matchRepository := matchRepository.NewMatchRepository(db)
+	scoreRepository := scoreRepository.NewScoreRepository(db)
+
+	//usecase
+	scoreUsecase := scoreUsecase.NewScoreUsecase(matchRepository, scoreRepository)
+	score_http.NewScoreHandler(app, myValidator, scoreUsecase)
 	teamUsecase := teamUsecase.NewTeamUsecase(teamRepository)
+	playerUsecase := playerUsecase.NewPlayerUsecase(playerRepository, teamUsecase)
+	matchUsecase := matchUsecase.NewMatchUsecase(matchRepository, playerRepository, teamUsecase, scoreUsecase)
+
+	//delivery
+	player_http.NewPlayerHandler(app, myValidator, playerUsecase)
 	team_http.NewTeamHandler(app, myValidator, teamUsecase)
+	match_http.NewMatchHandler(app, myValidator, matchUsecase)
 
 	log.Print(app.Listen(port))
 }

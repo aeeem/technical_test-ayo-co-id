@@ -1,6 +1,10 @@
-package delivery
+package player_http
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"strings"
 	"technical_test-ayo-co-id/internal/helper"
 	"technical_test-ayo-co-id/internal/player"
 	"technical_test-ayo-co-id/internal/validator"
@@ -13,23 +17,23 @@ type PlayerHandler struct {
 	PlayerUsecase player.PlayerUsecase
 }
 
-func NewTeamHandler(f *fiber.App, validator *validator.XValidator, PlayerUsecase player.PlayerUsecase) {
-	TeamHandler := PlayerHandler{
+func NewPlayerHandler(f *fiber.App, validator *validator.XValidator, PlayerUsecase player.PlayerUsecase) {
+	PlayerHandler := PlayerHandler{
 		PlayerUsecase: PlayerUsecase,
 		Validator:     validator,
 	}
-	teamRoute := f.Group("player")
-	//todo : add middleware for auth
-	teamRoute.Get("/", TeamHandler.Fetch)        //handling Fetch Data
-	teamRoute.Get("/:id", TeamHandler.GetById)   //handling GetById Data
-	teamRoute.Post("/", TeamHandler.Save)        //handling Save Data
-	teamRoute.Put("/", TeamHandler.Update)       //handling Update Data
-	teamRoute.Delete("/:id", TeamHandler.Delete) //handling Delete Data
+	playerRoutes := f.Group("player")
+	//todo: add middleware for auth
+	playerRoutes.Get("/", PlayerHandler.Fetch)        //handling Fetch Data
+	playerRoutes.Get("/:id", PlayerHandler.GetById)   //handling GetById Data
+	playerRoutes.Post("/", PlayerHandler.Save)        //handling Save Data
+	playerRoutes.Put("/", PlayerHandler.Update)       //handling Update Data
+	playerRoutes.Delete("/:id", PlayerHandler.Delete) //handling Delete Data
 }
 
 // @Router			/player	[get]
 // @Summary			fetch player data
-// @Param			team_id	query	integer	false	not required but if filled will filter by team id
+// @Param			team_id	query	integer	false	"not required but if filled will filter by team id"
 // @Param			cursor	query	string	false	"base64 encoded"
 // @Param			search	query	string	false "Team abcd"
 // @Param			limit	query	integer	true "10"
@@ -51,7 +55,7 @@ func (h PlayerHandler) Fetch(c *fiber.Ctx) (err error) {
 // @Router			/player/{id}	[get]
 // @Summary			get detail player data
 // @Param			id	path	integer	true	"user id"
-// @Tags			Player
+// @Tags			player
 // @Success			200	{object}	helper.StdResponse{data=player.Player}
 func (h PlayerHandler) GetById(c *fiber.Ctx) (err error) {
 	ID, err := c.ParamsInt("id")
@@ -68,18 +72,111 @@ func (h PlayerHandler) GetById(c *fiber.Ctx) (err error) {
 
 // @Router			/player	[post]
 // @Summary			Insert data into databases
-// @Tags			Player
+// @Tags			player
 // @Accept			json
-// @Param			id	body	team_http.TeamRequest	true "team post request"
+// @Param			id	body	player_http.PlayerRequest	true "team post request"
 // @Success			200	{object}	helper.StdResponse{data=player.Player}
 func (h PlayerHandler) Save(c *fiber.Ctx) (err error) {
-	return
+	//validation
+	PlayerRequest := PlayerRequest{}
+	if err := json.Unmarshal(c.Body(), &PlayerRequest); err != nil {
+		return helper.JsonErrorResponseValidation(c, err)
+	}
+
+	if errs := h.Validator.Validate(PlayerRequest); len(errs) > 0 && errs[0].Error {
+		errMsgs := make([]string, 0)
+
+		for _, err := range errs {
+			errMsgs = append(errMsgs, fmt.Sprintf(
+				"[%s]: '%v' | Needs to implement '%s'",
+				err.FailedField,
+				err.Value,
+				err.Tag,
+			))
+		}
+		err = errors.New(strings.Join(errMsgs, "/n"))
+		return helper.JsonErrorResponseValidation(c, err)
+	}
+	//end of validation
+	PlayerModel := player.Player{
+		FirstName:    PlayerRequest.FirstName,
+		LastName:     PlayerRequest.LastName,
+		Height:       PlayerRequest.Height,
+		Weight:       PlayerRequest.Weight,
+		Position:     PlayerRequest.Position,
+		JerseyNumber: PlayerRequest.JerseyNumber,
+		TeamID:       PlayerRequest.TeamID,
+	}
+	err = h.PlayerUsecase.Save(&PlayerModel)
+	if err != nil {
+		return helper.JsonErrorResponse(c, err)
+	}
+	return helper.JsonStandardResponseCreated(c, PlayerModel)
 }
 
+// @Router			/player	[put]
+// @Summary			Update data from databases
+// @Tags			player
+// @Accept			json
+// @Param			id	body	player_http.PlayerRequestUpdate	true "Player put request"
+// @Success			200	{object}	helper.StdResponse{data=player.Player}
 func (h PlayerHandler) Update(c *fiber.Ctx) (err error) {
-	return
+	// validation
+	PlayerRequest := PlayerRequestUpdate{}
+	if err := json.Unmarshal(c.Body(), &PlayerRequest); err != nil {
+		return helper.JsonErrorResponseValidation(c, err)
+	}
+
+	if errs := h.Validator.Validate(PlayerRequest); len(errs) > 0 && errs[0].Error {
+		errMsgs := make([]string, 0)
+		for _, err := range errs {
+			errMsgs = append(errMsgs, fmt.Sprintf(
+				"[%s]: '%v' | Needs to implement '%s'",
+				err.FailedField,
+				err.Value,
+				err.Tag,
+			))
+		}
+		err = errors.New(strings.Join(errMsgs, "/n"))
+		return helper.JsonErrorResponseValidation(c, err)
+	}
+	// end of validation
+	PlayerModel := player.Player{
+		Model: helper.Model{
+			ID: PlayerRequest.ID,
+		},
+		FirstName:    PlayerRequest.FirstName,
+		LastName:     PlayerRequest.LastName,
+		Height:       PlayerRequest.Height,
+		Weight:       PlayerRequest.Weight,
+		Position:     PlayerRequest.Position,
+		JerseyNumber: PlayerRequest.JerseyNumber,
+		TeamID:       PlayerRequest.TeamID,
+	}
+	err = h.PlayerUsecase.Update(&PlayerModel)
+	if err != nil {
+		return helper.JsonErrorResponse(c, err)
+	}
+
+	return helper.JsonStandardResponseUpdated(c, PlayerModel)
 }
 
+// @Router			/player/{id}	[delete]
+// @Summary			Delete data from databases
+// @Tags			player
+// @Accept			json
+// @Param			id	path	integer	true "Player id"
+// @Success			200	{object}	helper.StdResponse{data=nil}
 func (h PlayerHandler) Delete(c *fiber.Ctx) (err error) {
-	return
+	ID, err := c.ParamsInt("id")
+	if err != nil {
+		return helper.JsonErrorResponseValidation(c, err)
+	}
+
+	err = h.PlayerUsecase.Delete(ID)
+	if err != nil {
+		return helper.JsonErrorResponse(c, err)
+	}
+
+	return helper.JsonStandardResponseDeleted(c)
 }

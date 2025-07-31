@@ -1,6 +1,8 @@
 package validator
 
-import "github.com/go-playground/validator/v10"
+import (
+	"github.com/go-playground/validator/v10"
+)
 
 type (
 	XValidator struct {
@@ -23,7 +25,6 @@ var validate = validator.New()
 
 func (v XValidator) Validate(data interface{}) []ErrorResponse {
 	validationErrors := []ErrorResponse{}
-
 	errs := validate.Struct(data)
 	if errs != nil {
 		for _, err := range errs.(validator.ValidationErrors) {

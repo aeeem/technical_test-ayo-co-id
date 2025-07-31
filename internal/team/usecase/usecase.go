@@ -68,7 +68,7 @@ func (u *teamUsecase) Update(Team *team.Team) (err error) {
 		return
 	}
 	//in case gorm doesnt return error not found
-	if (OldTeams == team.Team{}) {
+	if OldTeams.ID == 0 {
 		return
 	}
 	err = u.teamRepository.Update(Team)
@@ -86,7 +86,7 @@ func (u *teamUsecase) Delete(ID int) (err error) {
 		return
 	}
 	//in case gorm doesnt return error not found
-	if (OldTeams == team.Team{}) {
+	if OldTeams.ID == 0 {
 		return
 	}
 	err = u.teamRepository.Delete(ID)

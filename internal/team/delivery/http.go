@@ -2,7 +2,9 @@ package team_http
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"strings"
 
 	"technical_test-ayo-co-id/internal/helper"
 	"technical_test-ayo-co-id/internal/team"
@@ -29,7 +31,6 @@ func NewTeamHandler(f *fiber.App, validator *validator.XValidator, TeamUsecase t
 	teamRoute.Post("/", TeamHandler.Save)        //handling Save Data
 	teamRoute.Put("/", TeamHandler.Update)       //handling Update Data
 	teamRoute.Delete("/:id", TeamHandler.Delete) //handling Delete Data
-
 }
 
 // @Router			/team	[get]
@@ -79,7 +80,7 @@ func (h *TeamHandler) GetById(c *fiber.Ctx) (err error) {
 func (h *TeamHandler) Save(c *fiber.Ctx) (err error) {
 	TeamRequest := TeamRequest{}
 	if err := json.Unmarshal(c.Body(), &TeamRequest); err != nil {
-		return helper.JsonErrorResponse(c, err)
+		return helper.JsonErrorResponseValidation(c, err)
 	}
 	if errs := h.Validator.Validate(TeamRequest); len(errs) > 0 && errs[0].Error {
 		errMsgs := make([]string, 0)
@@ -92,14 +93,15 @@ func (h *TeamHandler) Save(c *fiber.Ctx) (err error) {
 				err.Tag,
 			))
 		}
-		return helper.JsonErrorResponse(c, err)
+		err = errors.New(strings.Join(errMsgs, "/n"))
+		return helper.JsonErrorResponseValidation(c, err)
 	}
 	TeamModel := team.Team{
-		TeamName: TeamRequest.TeamName,
-		Logo:     TeamRequest.Logo,
-		Founded:  TeamRequest.Founded,
-		Address:  TeamRequest.Address,
-		City:     TeamRequest.City,
+		TeamName:    TeamRequest.TeamName,
+		Logo:        TeamRequest.Logo,
+		YearFounded: TeamRequest.YearFounded,
+		Address:     TeamRequest.Address,
+		City:        TeamRequest.City,
 	}
 	err = h.TeamUsecase.Save(&TeamModel)
 	if err != nil {
@@ -117,7 +119,7 @@ func (h *TeamHandler) Save(c *fiber.Ctx) (err error) {
 func (h *TeamHandler) Update(c *fiber.Ctx) (err error) {
 	TeamRequest := TeamRequestUpdate{}
 	if err := json.Unmarshal(c.Body(), &TeamRequest); err != nil {
-		return helper.JsonErrorResponse(c, err)
+		return helper.JsonErrorResponseValidation(c, err)
 	}
 	if errs := h.Validator.Validate(TeamRequest); len(errs) > 0 && errs[0].Error {
 		errMsgs := make([]string, 0)
@@ -130,18 +132,19 @@ func (h *TeamHandler) Update(c *fiber.Ctx) (err error) {
 				err.Tag,
 			))
 		}
-		return helper.JsonErrorResponse(c, err)
+		err = errors.New(strings.Join(errMsgs, "/n"))
+		return helper.JsonErrorResponseValidation(c, err)
 	}
 
 	TeamModel := team.Team{
 		Model: helper.Model{
 			ID: TeamRequest.ID,
 		},
-		TeamName: TeamRequest.TeamName,
-		Logo:     TeamRequest.Logo,
-		Founded:  TeamRequest.Founded,
-		Address:  TeamRequest.Address,
-		City:     TeamRequest.City,
+		TeamName:    TeamRequest.TeamName,
+		Logo:        TeamRequest.Logo,
+		YearFounded: TeamRequest.YearFounded,
+		Address:     TeamRequest.Address,
+		City:        TeamRequest.City,
 	}
 	err = h.TeamUsecase.Update(&TeamModel)
 	if err != nil {

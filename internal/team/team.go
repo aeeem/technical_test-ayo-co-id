@@ -6,11 +6,11 @@ import (
 
 type Team struct {
 	helper.Model
-	TeamName string `json:"team_name" example:"team_name"`
-	Logo     string `json:"logo" example:"logo"`
-	Founded  string `json:"founded" example:"founded"`
-	Address  string `json:"address" example:"address"`
-	City     string `json:"city" example:"city"`
+	TeamName    string `json:"team_name" example:"team_name"`
+	Logo        string `json:"logo" example:"logo"`
+	YearFounded string `json:"year_founded" example:"1994"`
+	Address     string `json:"address" example:"address"`
+	City        string `json:"city" example:"city"`
 }
 
 type TeamRepository interface {

@@ -3,14 +3,17 @@ package usecase
 import (
 	"technical_test-ayo-co-id/internal/helper"
 	"technical_test-ayo-co-id/internal/player"
+	"technical_test-ayo-co-id/internal/team"
 )
 
 type PlayerUsecase struct {
 	playerRepository player.PlayerRepository
+	TeamUsecase      team.TeamUsecase
 }
 
-func NewPlayerUsecase(playerRepository player.PlayerRepository) player.PlayerUsecase {
+func NewPlayerUsecase(playerRepository player.PlayerRepository, TeamUsecase team.TeamUsecase) player.PlayerUsecase {
 	return &PlayerUsecase{
+		TeamUsecase:      TeamUsecase,
 		playerRepository: playerRepository,
 	}
 }
@@ -54,6 +57,17 @@ func (u PlayerUsecase) GetById(ID int) (player player.Player, err error) {
 }
 
 func (u PlayerUsecase) Save(Player *player.Player) (err error) {
+	//check if team is available
+	Team, err := u.TeamUsecase.GetById(int(Player.TeamID))
+	if err != nil {
+		if err == helper.ErrNotFound {
+			return helper.BadRequest
+		}
+		return
+	}
+	if Team.ID == 0 {
+		return helper.BadRequest
+	}
 	err = u.playerRepository.Save(Player)
 	if err != nil {
 		return
@@ -63,12 +77,12 @@ func (u PlayerUsecase) Save(Player *player.Player) (err error) {
 
 func (u PlayerUsecase) Update(Player *player.Player) (err error) {
 	//check if team is already created
-	OldTeams, err := u.GetById(int(Player.ID))
+	OldPlayer, err := u.GetById(int(Player.ID))
 	if err != nil {
 		return
 	}
 	//in case gorm doesnt return error not found
-	if (OldTeams == player.Player{}) {
+	if OldPlayer.ID == 0 {
 		return
 	}
 	err = u.playerRepository.Update(Player)
@@ -81,12 +95,12 @@ func (u PlayerUsecase) Update(Player *player.Player) (err error) {
 
 func (u PlayerUsecase) Delete(ID int) (err error) {
 	//check team
-	OldTeams, err := u.GetById(ID)
+	OldPlayer, err := u.GetById(ID)
 	if err != nil {
 		return
 	}
 	//in case gorm doesnt return error not found
-	if (OldTeams == player.Player{}) {
+	if OldPlayer.ID == 0 {
 		return
 	}
 	err = u.playerRepository.Delete(ID)

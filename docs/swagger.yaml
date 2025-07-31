@@ -120,6 +120,11 @@ definitions:
       match_description:
         type: string
       match_status:
+        enum:
+        - ongoing
+        - finished
+        - upcoming
+        example: upcoming
         type: string
       match_time:
         example: "15:45:00"
@@ -139,13 +144,8 @@ definitions:
     - home_team
     - id
     - match_date
-    - match_description
-    - match_status
     - match_status
     - match_time
-    - player_mvp_id
-    - team_winner_name
-    - winner
     type: object
   player.Player:
     properties:
@@ -288,6 +288,30 @@ definitions:
         example: 1
         type: integer
     required:
+    - match_id
+    - player_id
+    - score_time
+    - team_id
+    type: object
+  score_http.ScoreUpdateRequest:
+    properties:
+      id:
+        example: 1
+        type: integer
+      match_id:
+        example: 1
+        type: integer
+      player_id:
+        example: 1
+        type: integer
+      score_time:
+        example: "12:30:00"
+        type: string
+      team_id:
+        example: 1
+        type: integer
+    required:
+    - id
     - match_id
     - player_id
     - score_time
@@ -436,7 +460,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: Updating data after match finished
+      description: matchstatus oneof=ongoing finished upcoming
       parameters:
       - description: match put request
         in: body
@@ -648,12 +672,35 @@ paths:
       summary: Insert data into databases
       tags:
       - Score
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: score post request
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/score_http.ScoreUpdateRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/score.Score'
+              type: object
+      summary: Insert data into databases
+      tags:
+      - Score
   /score/{match_id}:
     get:
       parameters:
       - description: match id
-        in: query
-        name: MatchID
+        in: path
+        name: match_id
         type: integer
       responses:
         "200":

@@ -118,7 +118,7 @@ func (h *MatchHandler) Save(c *fiber.Ctx) (err error) {
 
 // @Router			/match	[put]
 // @Summary			Update data from databases
-// @Description		Updating data after match finished
+// @Description		matchstatus oneof=ongoing finished upcoming
 // @Tags			match
 // @Accept			json
 // @Param			id	body	match_http.MatchRequestUpdate	true "match put request"
@@ -147,10 +147,11 @@ func (h *MatchHandler) Update(c *fiber.Ctx) (err error) {
 		Model: helper.Model{
 			ID: MatchRequestUpdate.ID,
 		},
-		MatchDate: MatchRequestUpdate.MatchDate,
-		MatchTime: MatchRequestUpdate.MatchTime,
-		HomeTeam:  MatchRequestUpdate.HomeTeam,
-		AwayTeam:  MatchRequestUpdate.AwayTeam,
+		MatchDate:   MatchRequestUpdate.MatchDate,
+		MatchTime:   MatchRequestUpdate.MatchTime,
+		HomeTeam:    MatchRequestUpdate.HomeTeam,
+		AwayTeam:    MatchRequestUpdate.AwayTeam,
+		MatchStatus: MatchRequestUpdate.MatchStatus,
 	}
 
 	//use update for updating match data after the match ended

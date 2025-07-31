@@ -2,6 +2,7 @@ package repository
 
 import (
 	"technical_test-ayo-co-id/internal/helper"
+	"technical_test-ayo-co-id/internal/match"
 	"technical_test-ayo-co-id/internal/score"
 
 	"gorm.io/gorm"
@@ -43,12 +44,34 @@ func (r *scoreRepository) FetchScoreTeamByMatchID(MatchID int, teamID uint) (Sco
 	}
 	return
 }
-func (r *scoreRepository) Save(Score *score.Score) (err error) {
-	err = r.DB.Model(&Score).Create(&Score).Error
-	if err != nil {
-		err = helper.CheckIfErrFromDbToStatusCode(err)
-		return
-	}
+func (r *scoreRepository) Save(Score *score.Score, ishome bool) (err error) {
+	err = r.DB.Transaction(func(tx *gorm.DB) error {
+		err = tx.Model(&Score).Create(&Score).Error
+		if err != nil {
+			tx.Rollback()
+			err = helper.CheckIfErrFromDbToStatusCode(err)
+			return err
+		}
+		//checking if score for away or for home team
+		if ishome {
+			err = tx.Model(&match.Match{}).Where("id = ?", Score.MatchID).
+				Update("total_score_away", gorm.Expr("Coalesce(total_score_away,0) + ?", 1)).Error
+			if err != nil {
+				tx.Rollback()
+				err = helper.CheckIfErrFromDbToStatusCode(err)
+				return err
+			}
+		} else {
+			err = tx.Model(&match.Match{}).Where("id = ?", Score.MatchID).
+				Update("total_score_home", gorm.Expr("Coalesce(total_score_home,0) + ?", 1)).Error
+			if err != nil {
+				tx.Rollback()
+				err = helper.CheckIfErrFromDbToStatusCode(err)
+				return err
+			}
+		}
+		return err
+	})
 	return
 
 }

@@ -43,20 +43,31 @@ func (u *scoreUsecase) Save(score *score.Score) (err error) {
 		return
 	}
 
+	//count total score
+
+	if Match.MatchStatus != "ongoing" {
+		err = helper.MakeUsecaseLevelErr(400, "match is not ongoing")
+		return
+	}
 	//check if player is available
 	Player, err := u.Matchrepository.GetById(int(score.PlayerID))
 	if err != nil {
 		return
 	}
-	if Player.ID != 0 && Match.ID != 0 {
-		err = u.ScoreRepository.Save(score)
-		if err != nil {
-			return
-		}
-	} else {
-		err = helper.ErrNotFound
+	if Player.ID == 0 && Match.ID == 0 {
+		err = helper.MakeUsecaseLevelErr(400, "Player Or Match not found")
 		return
 	}
+	//todo : make usecase level transaction to makesure transaction
+	isHome := true //default is for home
+	if Match.AwayTeam == score.TeamID {
+		isHome = false
+	}
+	err = u.ScoreRepository.Save(score, isHome)
+	if err != nil {
+		return
+	}
+
 	return
 }
 func (u *scoreUsecase) Update(score *score.Score) (err error) {
@@ -81,13 +92,24 @@ func (u *scoreUsecase) Update(score *score.Score) (err error) {
 			return
 		}
 	} else {
-		err = helper.ErrNotFound
+		err = helper.MakeUsecaseLevelErr(400, "Player Or Match Or Score, ID not found")
 		return
 	}
 	return
 }
 
 func (u *scoreUsecase) Delete(ID int) (err error) {
+	//check if score is available
+	OldScore, err := u.ScoreRepository.GetByID(uint(ID))
+	if err != nil {
+		return
+	}
+	//in case gorm doesnt return error not found
+	if OldScore.ID == 0 {
+		err = helper.MakeUsecaseLevelErr(400, "Score id not found")
+		return
+	}
+
 	err = u.ScoreRepository.Delete(ID)
 	if err != nil {
 		return

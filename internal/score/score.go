@@ -16,7 +16,7 @@ type ScoreRepository interface {
 	FetchScoreByMatchID(MatchID int) (Score []Score, err error)
 	GetByID(ID uint) (Score Score, err error)
 	FetchScoreTeamByMatchID(MatchID int, teamID uint) (Score []Score, err error)
-	Save(score *Score) (err error)
+	Save(score *Score, isHome bool) (err error)
 	Update(score *Score) (err error)
 	Delete(ID int) (err error)
 }

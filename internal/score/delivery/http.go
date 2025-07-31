@@ -35,13 +35,13 @@ func NewScoreHandler(f *fiber.App, Validator *validator.XValidator, ScoreUsecase
 
 // @Router			/score/{match_id}	[get]
 // @Summary			fetch team data
-// @Param			MatchID	query	integer	false	"match id"
+// @Param			match_id	path	integer	false	"match id"
 // @Tags			Score
 // @Success			200	{object}	helper.ListResponse{data=[]score.Score}
 func (h *ScoreHandler) FetchScoreByMatchID(c *fiber.Ctx) (err error) {
 	matchID, err := c.ParamsInt("match_id")
 	if err != nil {
-		err = errors.New("match should be integer")
+		err = errors.New("matchid should be integer")
 		return helper.JsonErrorResponseValidation(c, err)
 	}
 
@@ -112,6 +112,13 @@ func (h *ScoreHandler) Save(c *fiber.Ctx) (err error) {
 	}
 	return helper.JsonStandardResponseCreated(c, ScoreModel)
 }
+
+// @Router			/score	[put]
+// @Summary			Insert data into databases
+// @Tags			Score
+// @Accept			json
+// @Param			id	body	score_http.ScoreUpdateRequest	true "score post request"
+// @Success			200	{object}	helper.StdResponse{data=score.Score}
 func (h *ScoreHandler) Update(c *fiber.Ctx) (err error) {
 	ScoreRequest := ScoreUpdateRequest{}
 	if err := json.Unmarshal(c.Body(), &ScoreRequest); err != nil {

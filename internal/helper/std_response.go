@@ -84,3 +84,19 @@ func JsonStandardResponseDeleted(c *fiber.Ctx) (err error) {
 		},
 	)
 }
+
+func JsonErrorResponseCustomMessage(c *fiber.Ctx, errs error, msg string) (err error) {
+	//checking if error is usecase level
+	err = UsecaseLevelErrHTTPRespons(c, errs)
+	if err == nil {
+		return
+	}
+
+	return c.Status(TranslateErrorToHTTPCode(errs)).JSON(
+		StdResponse{
+			Message:   msg,
+			Data:      nil,
+			Timestamp: time.Now().Format(time.RFC3339),
+		},
+	)
+}

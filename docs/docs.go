@@ -85,7 +85,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Updating data after match finished",
+                "description": "matchstatus oneof=ongoing finished upcoming",
                 "consumes": [
                     "application/json"
                 ],
@@ -455,6 +455,46 @@ const docTemplate = `{
             }
         },
         "/score": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Score"
+                ],
+                "summary": "Insert data into databases",
+                "parameters": [
+                    {
+                        "description": "score post request",
+                        "name": "id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/score_http.ScoreUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.StdResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/score.Score"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
             "post": {
                 "consumes": [
                     "application/json"
@@ -506,8 +546,8 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "match id",
-                        "name": "MatchID",
-                        "in": "query"
+                        "name": "match_id",
+                        "in": "path"
                     }
                 ],
                 "responses": {
@@ -949,13 +989,8 @@ const docTemplate = `{
                 "home_team",
                 "id",
                 "match_date",
-                "match_description",
                 "match_status",
-                "match_status",
-                "match_time",
-                "player_mvp_id",
-                "team_winner_name",
-                "winner"
+                "match_time"
             ],
             "properties": {
                 "away_team": {
@@ -976,7 +1011,13 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "match_status": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "ongoing",
+                        "finished",
+                        "upcoming"
+                    ],
+                    "example": "upcoming"
                 },
                 "match_time": {
                     "type": "string",
@@ -1179,6 +1220,38 @@ const docTemplate = `{
                 "team_id"
             ],
             "properties": {
+                "match_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "player_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "score_time": {
+                    "type": "string",
+                    "example": "12:30:00"
+                },
+                "team_id": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "score_http.ScoreUpdateRequest": {
+            "type": "object",
+            "required": [
+                "id",
+                "match_id",
+                "player_id",
+                "score_time",
+                "team_id"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
                 "match_id": {
                     "type": "integer",
                     "example": 1

@@ -16,11 +16,28 @@ const (
 	UniqueViolationCode = pq.ErrorCode("23505")
 )
 
+func MakeUsecaseLevelErr(statusCode int, msg string) error {
+	return errors.New(strconv.Itoa(statusCode) + "|" + msg)
+}
+
 func IsErrorCode(err error, errcode pq.ErrorCode) bool {
 	if pgerr, ok := err.(*pq.Error); ok {
 		return pgerr.Code == errcode
 	}
 	return false
+}
+
+func TranslateErrorToHTTPCode(err error) (code int) {
+	if errors.Is(err, ErrNotFound) {
+		return fiber.StatusNotFound
+	}
+	if errors.Is(err, Duplicate) {
+		return fiber.StatusBadRequest
+	}
+	if errors.Is(err, BadRequest) {
+		return fiber.StatusBadRequest
+	}
+	return fiber.StatusInternalServerError
 }
 
 func CheckIfErrFromDbToStatusCode(err error) (errs error) {
@@ -50,6 +67,22 @@ func JsonErrorResponseValidation(c *fiber.Ctx, errs error) (err error) {
 }
 
 func JsonErrorResponse(c *fiber.Ctx, errs error) (err error) {
+	//if usecase level defined dont go anywhere
+	isUsecase, code, msg := CheckIfErrIsUsecaseLevel(errs)
+	if err != nil {
+		return c.Status(500).JSON(ErrorResponse{
+			Message:   "failed translating error, internal server error!",
+			Timestamp: time.Now().Format(time.RFC3339),
+		})
+	}
+
+	if isUsecase {
+		return c.Status(code).JSON(ErrorResponse{
+			Message:   msg,
+			Timestamp: time.Now().Format(time.RFC3339),
+		})
+	}
+
 	StatusCode, err := strconv.Atoi(errs.Error())
 	if err != nil {
 		log.Info().Err(err).Msg("Json error response error logs")

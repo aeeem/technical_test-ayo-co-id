@@ -1,4 +1,51 @@
 definitions:
+  auth.Auth:
+    properties:
+      created_at:
+        example: 1994-12-15T13:47
+        type: string
+      expiredIn:
+        type: string
+      id:
+        example: 1
+        type: integer
+      token:
+        type: string
+      updated_at:
+        example: 1994-12-15T13:47
+        type: string
+      userID:
+        type: integer
+    type: object
+  auth_http.Login:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  auth_http.Logout:
+    properties:
+      token:
+        type: string
+    required:
+    - token
+    type: object
+  auth_http.Register:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
   helper.ListResponse:
     properties:
       data: {}
@@ -387,7 +434,73 @@ definitions:
     type: object
 info:
   contact: {}
+  description: This is a sample server Petstore server.
+  termsOfService: http://swagger.io/terms/
+  title: Tech Test Api Docs
+  version: "1.0"
 paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: auth login post request
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/auth_http.Login'
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth.Auth'
+              type: object
+      summary: login auth data into databases
+      tags:
+      - Auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: auth register post request
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/auth_http.Logout'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.StdResponse'
+      summary: logout auth data into databases
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: auth register post request
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/auth_http.Register'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.StdResponse'
+      summary: register auth data into databases
+      tags:
+      - Auth
   /match:
     get:
       parameters:
@@ -434,6 +547,28 @@ paths:
       summary: fetch match data
       tags:
       - match
+  /match/{id}:
+    get:
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/match.Match'
+              type: object
+      summary: get detail match data
+      tags:
+      - match
+  /match/admin:
     post:
       consumes:
       - application/json
@@ -454,6 +589,8 @@ paths:
                 data:
                   $ref: '#/definitions/match.Match'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Insert data into databases
       tags:
       - match
@@ -478,10 +615,12 @@ paths:
                 data:
                   $ref: '#/definitions/match.Match'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update data from databases
       tags:
       - match
-  /match/{id}:
+  /match/admin/{id}:
     delete:
       consumes:
       - application/json
@@ -501,27 +640,9 @@ paths:
                 data:
                   type: object
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Delete data from databases
-      tags:
-      - match
-    get:
-      parameters:
-      - description: user id
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/helper.StdResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/match.Match'
-              type: object
-      summary: get detail match data
       tags:
       - match
   /player:
@@ -559,6 +680,28 @@ paths:
       summary: fetch player data
       tags:
       - player
+  /player/{id}:
+    get:
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/player.Player'
+              type: object
+      summary: get detail player data
+      tags:
+      - player
+  /player/admin:
     post:
       consumes:
       - application/json
@@ -579,6 +722,8 @@ paths:
                 data:
                   $ref: '#/definitions/player.Player'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Insert data into databases
       tags:
       - player
@@ -602,10 +747,12 @@ paths:
                 data:
                   $ref: '#/definitions/player.Player'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update data from databases
       tags:
       - player
-  /player/{id}:
+  /player/admin/{id}:
     delete:
       consumes:
       - application/json
@@ -625,76 +772,11 @@ paths:
                 data:
                   type: object
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Delete data from databases
       tags:
       - player
-    get:
-      parameters:
-      - description: user id
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/helper.StdResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/player.Player'
-              type: object
-      summary: get detail player data
-      tags:
-      - player
-  /score:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: score post request
-        in: body
-        name: id
-        required: true
-        schema:
-          $ref: '#/definitions/score_http.ScoreRequest'
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/helper.StdResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/score.Score'
-              type: object
-      summary: Insert data into databases
-      tags:
-      - Score
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: score post request
-        in: body
-        name: id
-        required: true
-        schema:
-          $ref: '#/definitions/score_http.ScoreUpdateRequest'
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/helper.StdResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/score.Score'
-              type: object
-      summary: Insert data into databases
-      tags:
-      - Score
   /score/{match_id}:
     get:
       parameters:
@@ -743,6 +825,102 @@ paths:
       summary: fetch team data
       tags:
       - Score
+  /score/admin:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: score post request
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/score_http.ScoreRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/score.Score'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Insert data into databases
+      tags:
+      - Score
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: score post request
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/score_http.ScoreUpdateRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/score.Score'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Insert data into databases
+      tags:
+      - Score
+  /score/admin/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - example: 1
+        in: path
+        name: id
+        required: true
+        type: integer
+      - example: 1
+        in: path
+        name: match_id
+        required: true
+        type: integer
+      - example: 1
+        in: path
+        name: player_id
+        required: true
+        type: integer
+      - example: "12:30:00"
+        in: path
+        name: score_time
+        required: true
+        type: string
+      - example: 1
+        in: path
+        name: team_id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/score.Score'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete data into databases
+      tags:
+      - Score
   /team:
     get:
       parameters:
@@ -774,6 +952,28 @@ paths:
       summary: fetch team data
       tags:
       - Team
+  /team/{id}:
+    get:
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.StdResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/team.Team'
+              type: object
+      summary: get detail team data
+      tags:
+      - Team
+  /team/admin:
     post:
       consumes:
       - application/json
@@ -794,6 +994,8 @@ paths:
                 data:
                   $ref: '#/definitions/team.Team'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Insert data into databases
       tags:
       - Team
@@ -817,10 +1019,12 @@ paths:
                 data:
                   $ref: '#/definitions/team.Team'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update data from databases
       tags:
       - Team
-  /team/{id}:
+  /team/admin/{id}:
     delete:
       consumes:
       - application/json
@@ -840,27 +1044,15 @@ paths:
                 data:
                   type: object
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Delete data from databases
       tags:
       - Team
-    get:
-      parameters:
-      - description: user id
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/helper.StdResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/team.Team'
-              type: object
-      summary: get detail team data
-      tags:
-      - Team
+securityDefinitions:
+  ApiKeyAuth:
+    description: Just insert after you hit login
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

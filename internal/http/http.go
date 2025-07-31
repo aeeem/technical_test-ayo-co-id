@@ -4,8 +4,17 @@ import (
 	"fmt"
 	"log"
 	"os"
+
 	internalValidator "technical_test-ayo-co-id/internal/validator"
 	"time"
+
+	"technical_test-ayo-co-id/internal/auth"
+	auth_http "technical_test-ayo-co-id/internal/auth/delivery"
+	authRepository "technical_test-ayo-co-id/internal/auth/repository"
+	authUsecase "technical_test-ayo-co-id/internal/auth/usecase"
+	"technical_test-ayo-co-id/internal/user"
+	userRepository "technical_test-ayo-co-id/internal/user/repository"
+	userUsecase "technical_test-ayo-co-id/internal/user/usecase"
 
 	"technical_test-ayo-co-id/internal/player"
 	player_http "technical_test-ayo-co-id/internal/player/delivery"
@@ -79,6 +88,8 @@ func HttpRun(port string) {
 		player.Player{},
 		match.Match{},
 		score.Score{},
+		user.User{},
+		auth.Auth{},
 	)
 
 	app := fiber.New()
@@ -95,18 +106,21 @@ func HttpRun(port string) {
 	playerRepository := playerRepository.NewPlayerRepository(db)
 	matchRepository := matchRepository.NewMatchRepository(db)
 	scoreRepository := scoreRepository.NewScoreRepository(db)
+	authRepository := authRepository.NewAuthRepository(db)
+	userRepo := userRepository.NewUserRepository(db)
 
 	//usecase
 	scoreUsecase := scoreUsecase.NewScoreUsecase(matchRepository, scoreRepository)
-	score_http.NewScoreHandler(app, myValidator, scoreUsecase)
 	teamUsecase := teamUsecase.NewTeamUsecase(teamRepository)
 	playerUsecase := playerUsecase.NewPlayerUsecase(playerRepository, teamUsecase)
 	matchUsecase := matchUsecase.NewMatchUsecase(matchRepository, playerRepository, teamUsecase, scoreUsecase)
-
+	userUsecase := userUsecase.NewUserUsecase(userRepo)
+	authUsecase := authUsecase.NewAuthusecase(authRepository, userUsecase)
 	//delivery
-	player_http.NewPlayerHandler(app, myValidator, playerUsecase)
-	team_http.NewTeamHandler(app, myValidator, teamUsecase)
-	match_http.NewMatchHandler(app, myValidator, matchUsecase)
-
+	middleware := auth_http.NewAuthHandler(app, myValidator, userUsecase, authUsecase)
+	score_http.NewScoreHandler(app, myValidator, scoreUsecase, middleware)
+	player_http.NewPlayerHandler(app, myValidator, playerUsecase, middleware)
+	team_http.NewTeamHandler(app, myValidator, teamUsecase, middleware)
+	match_http.NewMatchHandler(app, myValidator, matchUsecase, middleware)
 	log.Print(app.Listen(port))
 }

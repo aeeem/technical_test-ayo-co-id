@@ -18,18 +18,20 @@ type MatchHandler struct {
 	MatchUsecase match.MatchUsecase
 }
 
-func NewMatchHandler(f *fiber.App, validator *validator.XValidator, Matchusecase match.MatchUsecase) {
+func NewMatchHandler(f *fiber.App, validator *validator.XValidator, Matchusecase match.MatchUsecase, Middleware fiber.Handler) {
 	MatchHandler := MatchHandler{
 		Validator:    validator,
 		MatchUsecase: Matchusecase,
 	}
 	matchRoutes := f.Group("match")
+	admin := matchRoutes.Group("/admin")
+	admin.Use(Middleware)
 	//todo: add middleware for auth
-	matchRoutes.Get("/", MatchHandler.Fetch)        //handling Fetch Data
-	matchRoutes.Get("/:id", MatchHandler.GetById)   //handling GetById Data
-	matchRoutes.Post("/", MatchHandler.Save)        //handling Save Data
-	matchRoutes.Put("/", MatchHandler.Update)       //handling Update Data
-	matchRoutes.Delete("/:id", MatchHandler.Delete) //handling Delete Data
+	matchRoutes.Get("/", MatchHandler.Fetch)      //handling Fetch Data
+	matchRoutes.Get("/:id", MatchHandler.GetById) //handling GetById Data
+	admin.Post("/", MatchHandler.Save)            //handling Save Data
+	admin.Put("/", MatchHandler.Update)           //handling Update Data
+	admin.Delete("/:id", MatchHandler.Delete)     //handling Delete Data
 }
 
 // @Router			/match	[get]
@@ -75,9 +77,10 @@ func (h *MatchHandler) GetById(c *fiber.Ctx) (err error) {
 	return helper.JsonStandardResponseSuccess(c, TransformIntoJson(res))
 }
 
-// @Router			/match	[post]
+// @Router			/match/admin	[post]
 // @Summary			Insert data into databases
 // @Tags			match
+// @Security ApiKeyAuth
 // @Accept			json
 // @Param			id	body	match_http.MatchRequest	true "team post request"
 // @Success			200	{object}	helper.StdResponse{data=match.Match}
@@ -116,10 +119,11 @@ func (h *MatchHandler) Save(c *fiber.Ctx) (err error) {
 	return helper.JsonStandardResponseSuccess(c, TransformIntoJson(MatchModel))
 }
 
-// @Router			/match	[put]
+// @Router			/match/admin	[put]
 // @Summary			Update data from databases
 // @Description		matchstatus oneof=ongoing finished upcoming
 // @Tags			match
+// @Security ApiKeyAuth
 // @Accept			json
 // @Param			id	body	match_http.MatchRequestUpdate	true "match put request"
 // @Success			200	{object}	helper.StdResponse{data=match.Match}
@@ -164,11 +168,13 @@ func (h *MatchHandler) Update(c *fiber.Ctx) (err error) {
 	err = h.MatchUsecase.Update(&MatchModel)
 	if err != nil {
 		return helper.JsonErrorResponse(c, err)
+
 	}
 	return helper.JsonStandardResponseSuccess(c, TransformIntoJson(MatchModel))
 }
 
-// @Router			/match/{id}	[delete]
+// @Router			/match/admin/{id}	[delete]
+// @Security ApiKeyAuth
 // @Summary			Delete data from databases
 // @Tags			match
 // @Accept			json

@@ -14,6 +14,17 @@ func init() {
 	}
 
 }
+
+//	@title			Tech Test Api Docs
+//	@version		1.0
+//	@description	This is a sample server Petstore server.
+//	@termsOfService	http://swagger.io/terms/
+
+//	@securityDefinitions.apikey	ApiKeyAuth
+//	@in							header
+//	@name						Authorization
+//	@description				Just insert after you hit login
+
 func main() {
 	http.HttpRun(viper.GetString("server.address") + ":" + viper.GetString("server.port"))
 }

@@ -17,19 +17,21 @@ type ScoreHandler struct {
 	ScoreUsecase score.ScoreUsecase
 }
 
-func NewScoreHandler(f *fiber.App, Validator *validator.XValidator, ScoreUsecase score.ScoreUsecase) {
+func NewScoreHandler(f *fiber.App, Validator *validator.XValidator, ScoreUsecase score.ScoreUsecase, middleware fiber.Handler) {
 	ScoreHandler := ScoreHandler{
 		Validator:    Validator,
 		ScoreUsecase: ScoreUsecase,
 	}
 
 	scoreGroup := f.Group("score")
+
 	//todo : add middleware
 	scoreGroup.Get("/:match_id", ScoreHandler.FetchScoreByMatchID)
 	scoreGroup.Get("/:match_id/:team_id", ScoreHandler.FetchScoreTeamByMatchID)
-	scoreGroup.Post("/", ScoreHandler.Save)
-	scoreGroup.Put("/", ScoreHandler.Update)
-	scoreGroup.Delete("/:id", ScoreHandler.Delete)
+	adminGroup := scoreGroup.Group("/admin")
+	adminGroup.Post("/", ScoreHandler.Save)
+	adminGroup.Put("/", ScoreHandler.Update)
+	adminGroup.Delete("/:id", ScoreHandler.Delete)
 
 }
 
@@ -76,9 +78,10 @@ func (h *ScoreHandler) FetchScoreTeamByMatchID(c *fiber.Ctx) (err error) {
 	return helper.JsonListResponseSuccess(c, "", res)
 }
 
-// @Router			/score	[post]
+// @Router			/score/admin	[post]
 // @Summary			Insert data into databases
 // @Tags			Score
+// @Security ApiKeyAuth
 // @Accept			json
 // @Param			id	body	score_http.ScoreRequest	true "score post request"
 // @Success			200	{object}	helper.StdResponse{data=score.Score}
@@ -113,9 +116,10 @@ func (h *ScoreHandler) Save(c *fiber.Ctx) (err error) {
 	return helper.JsonStandardResponseCreated(c, ScoreModel)
 }
 
-// @Router			/score	[put]
+// @Router			/score/admin	[put]
 // @Summary			Insert data into databases
 // @Tags			Score
+// @Security ApiKeyAuth
 // @Accept			json
 // @Param			id	body	score_http.ScoreUpdateRequest	true "score post request"
 // @Success			200	{object}	helper.StdResponse{data=score.Score}
@@ -151,6 +155,14 @@ func (h *ScoreHandler) Update(c *fiber.Ctx) (err error) {
 	}
 	return helper.JsonStandardResponseCreated(c, ScoreModel)
 }
+
+// @Router			/score/admin/{id}	[delete]
+// @Summary			Delete data into databases
+// @Tags			Score
+// @Security ApiKeyAuth
+// @Accept			json
+// @Param			id	path	score_http.ScoreUpdateRequest	true "score post request"
+// @Success			200	{object}	helper.StdResponse{data=score.Score}
 func (h *ScoreHandler) Delete(c *fiber.Ctx) (err error) {
 	ID, err := c.ParamsInt("id")
 	if err != nil {

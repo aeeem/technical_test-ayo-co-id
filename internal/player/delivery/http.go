@@ -17,18 +17,21 @@ type PlayerHandler struct {
 	PlayerUsecase player.PlayerUsecase
 }
 
-func NewPlayerHandler(f *fiber.App, validator *validator.XValidator, PlayerUsecase player.PlayerUsecase) {
+func NewPlayerHandler(f *fiber.App, validator *validator.XValidator, PlayerUsecase player.PlayerUsecase, middleware fiber.Handler) {
 	PlayerHandler := PlayerHandler{
 		PlayerUsecase: PlayerUsecase,
 		Validator:     validator,
 	}
 	playerRoutes := f.Group("player")
 	//todo: add middleware for auth
-	playerRoutes.Get("/", PlayerHandler.Fetch)        //handling Fetch Data
-	playerRoutes.Get("/:id", PlayerHandler.GetById)   //handling GetById Data
-	playerRoutes.Post("/", PlayerHandler.Save)        //handling Save Data
-	playerRoutes.Put("/", PlayerHandler.Update)       //handling Update Data
-	playerRoutes.Delete("/:id", PlayerHandler.Delete) //handling Delete Data
+	playerRoutes.Get("/", PlayerHandler.Fetch)      //handling Fetch Data
+	playerRoutes.Get("/:id", PlayerHandler.GetById) //handling GetById Data
+
+	admin := playerRoutes.Group("/admin")
+	admin.Use(middleware)
+	admin.Post("/", PlayerHandler.Save)        //handling Save Data
+	admin.Put("/", PlayerHandler.Update)       //handling Update Data
+	admin.Delete("/:id", PlayerHandler.Delete) //handling Delete Data
 }
 
 // @Router			/player	[get]
@@ -70,8 +73,9 @@ func (h PlayerHandler) GetById(c *fiber.Ctx) (err error) {
 	return helper.JsonStandardResponseSuccess(c, res)
 }
 
-// @Router			/player	[post]
+// @Router			/player/admin	[post]
 // @Summary			Insert data into databases
+// @Security ApiKeyAuth
 // @Tags			player
 // @Accept			json
 // @Param			id	body	player_http.PlayerRequest	true "team post request"
@@ -114,8 +118,9 @@ func (h PlayerHandler) Save(c *fiber.Ctx) (err error) {
 	return helper.JsonStandardResponseCreated(c, PlayerModel)
 }
 
-// @Router			/player	[put]
+// @Router			/player/admin	[put]
 // @Summary			Update data from databases
+// @Security ApiKeyAuth
 // @Tags			player
 // @Accept			json
 // @Param			id	body	player_http.PlayerRequestUpdate	true "Player put request"
@@ -161,10 +166,11 @@ func (h PlayerHandler) Update(c *fiber.Ctx) (err error) {
 	return helper.JsonStandardResponseUpdated(c, PlayerModel)
 }
 
-// @Router			/player/{id}	[delete]
+// @Router			/player/admin/{id}	[delete]
 // @Summary			Delete data from databases
 // @Tags			player
 // @Accept			json
+// @Security ApiKeyAuth
 // @Param			id	path	integer	true "Player id"
 // @Success			200	{object}	helper.StdResponse{data=nil}
 func (h PlayerHandler) Delete(c *fiber.Ctx) (err error) {

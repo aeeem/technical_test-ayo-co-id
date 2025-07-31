@@ -39,3 +39,4 @@ the docs can be seen at
   http://172.17.0.1:9292/swagger/index.html#
 ```
 
+and can be tested trough there
